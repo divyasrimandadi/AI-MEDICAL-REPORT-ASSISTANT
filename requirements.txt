@@ -1,0 +1,16 @@
+tensorflow
+keras
+numpy
+pandas
+matplotlib
+seaborn
+opencv-python
+scikit-learn
+streamlit
+fastapi
+uvicorn
+python-multipart
+pillow
+requests
+google-generativeai
+python-dotenv
