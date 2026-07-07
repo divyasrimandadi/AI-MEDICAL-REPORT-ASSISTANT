@@ -1,0 +1,31 @@
+<<<<<<< HEAD
+tensorflow==2.16.1
+keras==3.3.3
+numpy==1.26.4
+fastapi==0.115.0
+uvicorn==0.30.1
+pillow==10.4.0
+python-multipart==0.0.9
+python-dotenv==1.0.1
+google-generativeai==0.7.2
+pydantic==2.8.2
+streamlit 
+requests
+=======
+tensorflow
+keras
+numpy
+pandas
+matplotlib
+seaborn
+opencv-python
+scikit-learn
+streamlit
+fastapi
+uvicorn
+python-multipart
+pillow
+requests
+google-generativeai
+python-dotenv
+>>>>>>> 6185cbc68af3c6a8ece3c161932f26a22b7e5e74
