@@ -1,0 +1,9 @@
+venv/ 
+.env 
+backend/.env 
+__pycache__/ 
+*.pyc 
+*.pyd 
+.ipynb_checkpoints/ 
+*.db 
+outputs/
