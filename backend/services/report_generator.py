@@ -1,36 +1,26 @@
 import os
 from dotenv import load_dotenv
-from google import generativeai as genai
+from google import genai
 
 load_dotenv()
 
 API_KEY = os.getenv("GEMINI_API_KEY")
 
-model = None
+print("API KEY:", API_KEY[:15] + "..." if API_KEY else "NOT FOUND")
+
+client = None
 
 try:
-
     if API_KEY:
-
-        genai.configure(
-            api_key=API_KEY
-        )
-
-        model = genai.GenerativeModel(
-            "gemini-1.5-flash"
-        )
-
-        print("Gemini Connected")
-
+        client = genai.Client(api_key=API_KEY)
+        print("✅ Gemini Client Connected")
+    else:
+        print("❌ Gemini API Key Not Found")
 except Exception as e:
+    print("Gemini Client Error:", e)
 
-    print("Gemini Error:", e)
 
-
-def generate_medical_report(
-    prediction,
-    confidence
-):
+def generate_medical_report(prediction, confidence):
 
     fallback_report = f"""
 # 🩺 AI Medical Report
@@ -40,87 +30,66 @@ def generate_medical_report(
 - Confidence Score: {confidence}%
 
 ## Findings
-The uploaded chest X-ray image was analyzed using a deep learning medical imaging model.
-
-Radiological patterns suggest possible signs associated with {prediction.lower()}.
+The uploaded chest X-ray image was analyzed using an AI-powered medical imaging system.
 
 ## Impression
-AI analysis indicates a probability of {confidence}% for {prediction.lower()}.
+Radiological patterns suggest possible signs associated with {prediction.lower()}.
 
 ## Severity Assessment
-- Mild to Moderate suspicion based on imaging patterns.
+Moderate suspicion based on AI findings.
 
 ## Recommendation
-- Clinical correlation recommended.
-- Follow-up chest imaging may be considered.
-- Consultation with a radiologist or pulmonologist is advised.
+- Clinical correlation recommended
+- Follow-up imaging advised
+- Consult a radiologist
 
 ## Disclaimer
-This report is AI-generated and intended only for research and assistance purposes. It is not a substitute for professional medical diagnosis.
+This report is AI-generated and should not replace professional medical diagnosis.
 """
 
-    try:
+    if client is None:
+        return fallback_report
 
-        if model is None:
+    prompt = f"""
+You are an expert radiologist.
 
-            return fallback_report
-
-        prompt = f"""
-You are an expert AI radiologist assistant.
-
-Generate a professional chest X-ray analysis report.
-
-Patient Chest X-ray AI Prediction:
+Prediction:
 {prediction}
 
-Confidence Score:
+Confidence:
 {confidence}%
 
-Generate the report in EXACTLY this structure:
+Generate a professional chest X-ray report with these sections:
 
 # 🩺 AI Medical Report
 
 ## Prediction
-- Disease Detected
-- Confidence Score
 
 ## Findings
-Detailed radiological findings.
 
 ## Impression
-Clinical interpretation.
 
 ## Severity Assessment
-Mention whether the case appears mild, moderate, or severe.
 
 ## Recommendation
-Provide next medical recommendations.
 
 ## Disclaimer
-Mention this is AI-generated and not a final diagnosis.
 
-Requirements:
-- Professional medical language
-- Concise
-- Realistic radiology style
-- Clear formatting
+Use professional medical language.
 """
 
-        response = model.generate_content(
-            prompt
+    try:
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
         )
 
         if response.text:
-
             return response.text
 
         return fallback_report
 
     except Exception as e:
-
-        print(
-            "Gemini Generation Error:",
-            e
-        )
-
+        print("Gemini Error:", e)
         return fallback_report
