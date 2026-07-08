@@ -1,40 +1,93 @@
-import random
+import os
+import numpy as np
+import tensorflow as tf
+from PIL import Image
+from tensorflow.keras.applications.efficientnet import preprocess_input
 
-print("DEMO PREDICTOR LOADED")
+# ---------------------------------------------------
+# Paths
+# ---------------------------------------------------
 
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def predict_image(image):
+BACKEND_DIR = os.path.dirname(CURRENT_DIR)
 
-    pneumonia_confidence = round(
-        random.uniform(75, 99),
-        2
-    )
+PROJECT_ROOT = os.path.dirname(BACKEND_DIR)
 
-    normal_confidence = round(
-        100 - pneumonia_confidence,
-        2
-    )
+MODEL_PATH = os.path.join(
+    PROJECT_ROOT,
+    "model",
+    "medical_model.keras"
+)
 
-    if pneumonia_confidence > 85:
+CLASS_PATH = os.path.join(
+    PROJECT_ROOT,
+    "model",
+    "class_names.txt"
+)
 
-        prediction = "PNEUMONIA"
+# ---------------------------------------------------
+# Load Model
+# ---------------------------------------------------
 
-        confidence = pneumonia_confidence
+print("Loading AI Model...")
+
+model = tf.keras.models.load_model(MODEL_PATH)
+
+print("Model Loaded Successfully!")
+
+# ---------------------------------------------------
+# Load Class Names
+# ---------------------------------------------------
+
+with open(CLASS_PATH, "r") as f:
+    class_names = [line.strip() for line in f.readlines()]
+
+print(class_names)
+
+# ---------------------------------------------------
+# Image Preprocessing
+# ---------------------------------------------------
+
+def preprocess_image(image: Image.Image):
+
+    image = image.convert("RGB")
+
+    image = image.resize((224, 224))
+
+    img = np.array(image)
+
+    img = preprocess_input(img)
+
+    img = np.expand_dims(img, axis=0)
+
+    return img
+
+# ---------------------------------------------------
+# Prediction
+# ---------------------------------------------------
+
+def predict_image(image: Image.Image):
+
+    img = preprocess_image(image)
+
+    prediction = model.predict(img, verbose=0)
+
+    probability = float(prediction[0][0])
+
+    if probability >= 0.5:
+
+        predicted_class = class_names[1]
+
+        confidence = probability
 
     else:
 
-        prediction = "NORMAL"
+        predicted_class = class_names[0]
 
-        confidence = normal_confidence
+        confidence = 1 - probability
 
-    print(
-        "Prediction:",
-        prediction
-    )
-
-    print(
-        "Confidence:",
-        confidence
-    )
-
-    return prediction, confidence
+    return {
+        "prediction": predicted_class,
+        "confidence": round(confidence * 100, 2)
+    }

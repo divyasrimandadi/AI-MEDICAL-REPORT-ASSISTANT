@@ -1,18 +1,25 @@
 import streamlit as st
+import requests
 from PIL import Image
+<<<<<<< HEAD
 import requests
 
 API_URL = "http://127.0.0.1:8001/predict"
 HEALTH_URL = "http://127.0.0.1:8001/health"
+=======
+
+API_URL = "http://127.0.0.1:8000/predict"
+>>>>>>> divya
 
 st.set_page_config(
     page_title="AI Medical Report Assistant",
     page_icon="🩺",
-    layout="centered"
+    layout="wide"
 )
 
 st.title("🩺 AI Medical Report Assistant")
 
+<<<<<<< HEAD
 st.write("""
 Upload a chest X-ray image for:
 
@@ -20,6 +27,11 @@ Upload a chest X-ray image for:
 - Confidence Score
 - AI-generated Medical Report
 """)
+=======
+st.write(
+    "Upload a Chest X-ray image to predict the disease and generate an AI medical report."
+)
+>>>>>>> divya
 
 # Check Backend
 try:
@@ -36,11 +48,11 @@ except Exception as e:
     st.stop()
 
 uploaded_file = st.file_uploader(
-    "Upload Chest X-ray Image",
+    "Choose a Chest X-ray Image",
     type=["png", "jpg", "jpeg"]
 )
 
-if uploaded_file is not None:
+if uploaded_file:
 
     image = Image.open(uploaded_file)
 
@@ -50,12 +62,17 @@ if uploaded_file is not None:
         use_container_width=True
     )
 
-    if st.button("Generate AI Report"):
+    if st.button("Analyze Image"):
 
+<<<<<<< HEAD
         st.write("✅ Button Clicked")
 
         try:
 
+=======
+        with st.spinner("Analyzing image..."):
+
+>>>>>>> divya
             files = {
                 "file": (
                     uploaded_file.name,
@@ -64,6 +81,7 @@ if uploaded_file is not None:
                 )
             }
 
+<<<<<<< HEAD
             st.write("📤 Sending image to backend...")
 
             response = requests.post(
@@ -77,7 +95,45 @@ if uploaded_file is not None:
             result = response.json()
 
             st.json(result)
+=======
+            response = requests.post(
+                API_URL,
+                files=files
+            )
+
+            if response.status_code == 200:
+
+                result = response.json()
+
+                st.success("Analysis Completed Successfully")
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+
+                    st.metric(
+                        "Prediction",
+                        result["prediction"]
+                    )
+
+                with col2:
+
+                    st.metric(
+                        "Confidence",
+                        f'{result["confidence"]:.2f}%'
+                    )
+
+                st.subheader("AI Medical Report")
+
+                st.markdown(result["report"])
+>>>>>>> divya
 
         except Exception as e:
 
+<<<<<<< HEAD
             st.exception(e)
+=======
+                st.error("Backend Error")
+
+                st.write(response.text)
+>>>>>>> divya

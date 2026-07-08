@@ -1,11 +1,16 @@
+<<<<<<< HEAD
 import os
 from dotenv import load_dotenv
 from google import genai
+=======
+import google.generativeai as genai
+>>>>>>> divya
 
-load_dotenv()
+from backend.config import GEMINI_API_KEY
 
-API_KEY = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=GEMINI_API_KEY)
 
+<<<<<<< HEAD
 print("API KEY:", API_KEY[:15] + "..." if API_KEY else "NOT FOUND")
 
 client = None
@@ -18,17 +23,19 @@ try:
         print("❌ Gemini API Key Not Found")
 except Exception as e:
     print("Gemini Client Error:", e)
+=======
+model = genai.GenerativeModel("gemini-2.5-flash")
+>>>>>>> divya
 
 
 def generate_medical_report(prediction, confidence):
 
-    fallback_report = f"""
-# 🩺 AI Medical Report
+    prompt = f"""
+You are an experienced medical AI assistant.
 
-## Prediction
-- Disease Detected: {prediction}
-- Confidence Score: {confidence}%
+A chest X-ray image has already been analyzed.
 
+<<<<<<< HEAD
 ## Findings
 The uploaded chest X-ray image was analyzed using an AI-powered medical imaging system.
 
@@ -53,16 +60,25 @@ This report is AI-generated and should not replace professional medical diagnosi
     prompt = f"""
 You are an expert radiologist.
 
+=======
+>>>>>>> divya
 Prediction:
 {prediction}
 
 Confidence:
+<<<<<<< HEAD
 {confidence}%
 
 Generate a professional chest X-ray report with these sections:
+=======
+{confidence:.2f}%
 
-# 🩺 AI Medical Report
+Generate a professional medical report.
+>>>>>>> divya
 
+Use exactly the following format.
+
+<<<<<<< HEAD
 ## Prediction
 
 ## Findings
@@ -93,3 +109,32 @@ Use professional medical language.
     except Exception as e:
         print("Gemini Error:", e)
         return fallback_report
+=======
+# AI Medical Report
+
+## Predicted Disease
+Mention only the predicted disease.
+
+## Confidence
+Mention the confidence percentage.
+
+## Findings
+Explain what the disease means in simple medical language.
+
+## Possible Symptoms
+Mention common symptoms.
+
+## Recommendations
+Mention next medical steps.
+
+## Severity
+Low / Moderate / High.
+
+## Disclaimer
+Mention that this is AI-generated and not a substitute for a doctor.
+"""
+
+    response = model.generate_content(prompt)
+
+    return response.text
+>>>>>>> divya

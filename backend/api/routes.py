@@ -1,59 +1,43 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File
 from PIL import Image
 import io
+import os
 
 from backend.services.predictor import predict_image
 from backend.services.report_generator import generate_medical_report
-from backend.services.database_service import save_prediction
+from backend.services.database_service import save_report
 
 router = APIRouter()
 
 
 @router.post("/predict")
-async def predict(
-    file: UploadFile = File(...)
-):
+async def predict(file: UploadFile = File(...)):
 
-    try:
+    image_bytes = await file.read()
 
-        if not file.content_type.startswith("image/"):
+    image = Image.open(io.BytesIO(image_bytes))
 
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid image file"
-            )
+    prediction_result = predict_image(image)
 
-        contents = await file.read()
+    prediction = prediction_result["prediction"]
 
-        image = Image.open(
-            io.BytesIO(contents)
-        ).convert("RGB")
+    confidence = prediction_result["confidence"]
 
-        prediction, confidence = predict_image(
-            image
-        )
+    report = generate_medical_report(
+        prediction,
+        confidence
+    )
 
-        report = generate_medical_report(
-            prediction,
-            confidence
-        )
+    save_report(
+        filename=file.filename,
+        prediction=prediction,
+        confidence=confidence,
+        report=report
+    )
 
-        save_prediction(
-            file.filename,
-            prediction,
-            confidence,
-            report
-        )
-
-        return {
-            "filename": file.filename,
-            "prediction": prediction,
-            "confidence": confidence,
-            "report": report
-        }
-
-    except Exception as e:
-
-        return {
-            "error": str(e)
-        }
+    return {
+        "filename": file.filename,
+        "prediction": prediction,
+        "confidence": confidence,
+        "report": report
+    }
