@@ -1,126 +1,53 @@
-import os
-from dotenv import load_dotenv
-from google import generativeai as genai
+import google.generativeai as genai
 
-load_dotenv()
+from backend.config import GEMINI_API_KEY
 
-API_KEY = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=GEMINI_API_KEY)
 
-model = None
-
-try:
-
-    if API_KEY:
-
-        genai.configure(
-            api_key=API_KEY
-        )
-
-        model = genai.GenerativeModel(
-            "gemini-1.5-flash"
-        )
-
-        print("Gemini Connected")
-
-except Exception as e:
-
-    print("Gemini Error:", e)
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 
-def generate_medical_report(
-    prediction,
-    confidence
-):
+def generate_medical_report(prediction, confidence):
 
-    fallback_report = f"""
-# 🩺 AI Medical Report
+    prompt = f"""
+You are an experienced medical AI assistant.
 
-## Prediction
-- Disease Detected: {prediction}
-- Confidence Score: {confidence}%
+A chest X-ray image has already been analyzed.
 
-## Findings
-The uploaded chest X-ray image was analyzed using a deep learning medical imaging model.
-
-Radiological patterns suggest possible signs associated with {prediction.lower()}.
-
-## Impression
-AI analysis indicates a probability of {confidence}% for {prediction.lower()}.
-
-## Severity Assessment
-- Mild to Moderate suspicion based on imaging patterns.
-
-## Recommendation
-- Clinical correlation recommended.
-- Follow-up chest imaging may be considered.
-- Consultation with a radiologist or pulmonologist is advised.
-
-## Disclaimer
-This report is AI-generated and intended only for research and assistance purposes. It is not a substitute for professional medical diagnosis.
-"""
-
-    try:
-
-        if model is None:
-
-            return fallback_report
-
-        prompt = f"""
-You are an expert AI radiologist assistant.
-
-Generate a professional chest X-ray analysis report.
-
-Patient Chest X-ray AI Prediction:
+Prediction:
 {prediction}
 
-Confidence Score:
-{confidence}%
+Confidence:
+{confidence:.2f}%
 
-Generate the report in EXACTLY this structure:
+Generate a professional medical report.
 
-# 🩺 AI Medical Report
+Use exactly the following format.
 
-## Prediction
-- Disease Detected
-- Confidence Score
+# AI Medical Report
+
+## Predicted Disease
+Mention only the predicted disease.
+
+## Confidence
+Mention the confidence percentage.
 
 ## Findings
-Detailed radiological findings.
+Explain what the disease means in simple medical language.
 
-## Impression
-Clinical interpretation.
+## Possible Symptoms
+Mention common symptoms.
 
-## Severity Assessment
-Mention whether the case appears mild, moderate, or severe.
+## Recommendations
+Mention next medical steps.
 
-## Recommendation
-Provide next medical recommendations.
+## Severity
+Low / Moderate / High.
 
 ## Disclaimer
-Mention this is AI-generated and not a final diagnosis.
-
-Requirements:
-- Professional medical language
-- Concise
-- Realistic radiology style
-- Clear formatting
+Mention that this is AI-generated and not a substitute for a doctor.
 """
 
-        response = model.generate_content(
-            prompt
-        )
+    response = model.generate_content(prompt)
 
-        if response.text:
-
-            return response.text
-
-        return fallback_report
-
-    except Exception as e:
-
-        print(
-            "Gemini Generation Error:",
-            e
-        )
-
-        return fallback_report
+    return response.text

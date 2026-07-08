@@ -1,50 +1,43 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File
 from PIL import Image
 import io
+import os
 
 from backend.services.predictor import predict_image
 from backend.services.report_generator import generate_medical_report
-from backend.services.database_service import save_prediction
+from backend.services.database_service import save_report
 
 router = APIRouter()
 
 
 @router.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    try:
-        print("1. Request received")
 
-        if not file.content_type.startswith("image/"):
-            raise HTTPException(status_code=400, detail="Invalid image file")
+    image_bytes = await file.read()
 
-        contents = await file.read()
-        print("2. File read")
+    image = Image.open(io.BytesIO(image_bytes))
 
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
-        print("3. Image opened")
+    prediction_result = predict_image(image)
 
-        prediction, confidence = predict_image(image)
-        print("4. Prediction:", prediction, confidence)
+    prediction = prediction_result["prediction"]
 
-        report = generate_medical_report(prediction, confidence)
-        print("5. Report generated")
+    confidence = prediction_result["confidence"]
 
-        save_prediction(
-            file.filename,
-            prediction,
-            confidence,
-            report
-        )
-        print("6. Saved to database")
+    report = generate_medical_report(
+        prediction,
+        confidence
+    )
 
-        return {
-            "filename": file.filename,
-            "prediction": prediction,
-            "confidence": confidence,
-            "report": report
-        }
+    save_report(
+        filename=file.filename,
+        prediction=prediction,
+        confidence=confidence,
+        report=report
+    )
 
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return {"error": str(e)}
+    return {
+        "filename": file.filename,
+        "prediction": prediction,
+        "confidence": confidence,
+        "report": report
+    }
