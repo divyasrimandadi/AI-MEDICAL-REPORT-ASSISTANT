@@ -339,29 +339,120 @@ callbacks = [
 
 ]
 
-
-
 ####################################################
-# LOAD TRAINED MODEL
+# INITIAL TRAINING
 ####################################################
 
 print("\n")
-print("=" * 60)
-print("LOADING TRAINED MODEL")
-print("=" * 60)
+print("="*60)
+print("INITIAL TRAINING")
+print("="*60)
 
-if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError(
-        f"Trained model not found:\n{MODEL_PATH}"
-    )
+history = model.fit(
+
+    train_generator,
+
+    validation_data=validation_generator,
+
+    epochs=INITIAL_EPOCHS,
+
+    callbacks=callbacks,
+
+    class_weight=class_weights,
+
+    verbose=1
+
+)
+
+####################################################
+# FINE TUNING
+####################################################
+
+print("\n")
+print("="*60)
+print("FINE TUNING")
+print("="*60)
+
+# Unfreeze the base model
+base_model.trainable = True
+
+# Freeze first layers and train only last layers
+for layer in base_model.layers[:-80]:
+    layer.trainable = False
+
+####################################################
+# RECOMPILE
+####################################################
+
+model.compile(
+
+    optimizer=Adam(
+        learning_rate=1e-5
+    ),
+
+    loss="binary_crossentropy",
+
+    metrics=[
+
+        "accuracy",
+
+        tf.keras.metrics.AUC(name="auc"),
+
+        tf.keras.metrics.Precision(name="precision"),
+
+        tf.keras.metrics.Recall(name="recall")
+
+    ]
+
+)
+
+####################################################
+# TRAIN AGAIN
+####################################################
+
+history_fine = model.fit(
+
+    train_generator,
+
+    validation_data=validation_generator,
+
+    epochs=FINE_TUNE_EPOCHS,
+
+    callbacks=callbacks,
+
+    class_weight=class_weights,
+
+    verbose=1
+
+)
+
+####################################################
+# LOAD BEST MODEL
+####################################################
+
+print("\nLoading Best Model...\n")
 
 model = tf.keras.models.load_model(MODEL_PATH)
 
-history = None
-history_fine = None
+####################################################
+# MODEL EVALUATION
+####################################################
 
-print("Model loaded successfully.")
+print("\n")
+print("="*60)
+print("MODEL EVALUATION")
+print("="*60)
 
+loss, accuracy, auc_score, precision, recall = model.evaluate(
+    test_generator,
+    verbose=1
+)
+
+print(f"\nTest Loss      : {loss:.4f}")
+print(f"Test Accuracy  : {accuracy:.4f}")
+print(f"Test AUC       : {auc_score:.4f}")
+print(f"Test Precision : {precision:.4f}")
+print(f"Test Recall    : {recall:.4f}")
 
 ####################################################
 # PREDICTIONS
