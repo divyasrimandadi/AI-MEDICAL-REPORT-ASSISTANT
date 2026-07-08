@@ -28,7 +28,7 @@ if uploaded_file:
     st.image(
         image,
         caption="Uploaded Chest X-ray",
-        width="stretch"     # replaces use_container_width=True
+        width="stretch"
     )
 
     if st.button("Analyze Image"):
@@ -47,10 +47,15 @@ if uploaded_file:
                 response = requests.post(
                     API_URL,
                     files=files,
-                    timeout=60
+                    timeout=120
                 )
 
-                response.raise_for_status()
+                st.write("Status Code:", response.status_code)
+
+                if response.status_code != 200:
+                    st.error("Backend returned an error.")
+                    st.code(response.text)
+                    st.stop()
 
                 result = response.json()
 
@@ -74,11 +79,18 @@ if uploaded_file:
 
                 st.markdown(result["report"])
 
-            except requests.exceptions.ConnectionError:
-                st.error("❌ Cannot connect to backend. Make sure FastAPI is running on port 8000.")
+            except requests.exceptions.ConnectionError as e:
+                st.error("❌ Connection Error")
+                st.exception(e)
 
-            except requests.exceptions.Timeout:
-                st.error("❌ Backend timed out.")
+            except requests.exceptions.Timeout as e:
+                st.error("❌ Request Timed Out")
+                st.exception(e)
+
+            except requests.exceptions.RequestException as e:
+                st.error("❌ Request Failed")
+                st.exception(e)
 
             except Exception as e:
-                st.error(f"❌ {e}")
+                st.error("❌ Unexpected Error")
+                st.exception(e)
