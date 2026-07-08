@@ -281,7 +281,7 @@ model.compile(
 
 )
 
-model.summary()
+
 
 ####################################################
 # CALLBACKS
@@ -341,19 +341,19 @@ callbacks = [
 
 
 
+
+
 ####################################################
 # LOAD TRAINED MODEL
 ####################################################
 
-print("\n")
 print("=" * 60)
-print("LOADING TRAINED MODEL")
+print("MODEL PATH:", MODEL_PATH)
+print("EXISTS:", os.path.exists(MODEL_PATH))
+print("SIZE:", os.path.getsize(MODEL_PATH))
 print("=" * 60)
 
-if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError(
-        f"Trained model not found:\n{MODEL_PATH}"
-    )
+model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 
 model = tf.keras.models.load_model(MODEL_PATH)
 
@@ -482,6 +482,7 @@ plt.plot(
     [0,1],
     "--"
 )
+
 
 plt.xlabel("False Positive Rate")
 

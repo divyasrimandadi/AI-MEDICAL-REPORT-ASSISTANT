@@ -1,6 +1,14 @@
 import os
 import numpy as np
+
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 import tensorflow as tf
+
+import warnings
+
+warnings.filterwarnings("ignore") 
+
 from PIL import Image
 from tensorflow.keras.applications.efficientnet import preprocess_input
 
