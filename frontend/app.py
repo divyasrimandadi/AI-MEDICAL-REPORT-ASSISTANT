@@ -1,15 +1,9 @@
 import streamlit as st
 import requests
 from PIL import Image
-<<<<<<< HEAD
-import requests
-
-API_URL = "http://127.0.0.1:8001/predict"
-HEALTH_URL = "http://127.0.0.1:8001/health"
-=======
 
 API_URL = "http://127.0.0.1:8000/predict"
->>>>>>> divya
+HEALTH_URL = "http://127.0.0.1:8000/"
 
 st.set_page_config(
     page_title="AI Medical Report Assistant",
@@ -19,19 +13,13 @@ st.set_page_config(
 
 st.title("🩺 AI Medical Report Assistant")
 
-<<<<<<< HEAD
 st.write("""
-Upload a chest X-ray image for:
+Upload a chest X-ray image to:
 
-- Pneumonia Detection
-- Confidence Score
-- AI-generated Medical Report
+- Detect Normal or Pneumonia
+- View Confidence Score
+- Generate an AI Medical Report
 """)
-=======
-st.write(
-    "Upload a Chest X-ray image to predict the disease and generate an AI medical report."
-)
->>>>>>> divya
 
 # Check Backend
 try:
@@ -40,11 +28,10 @@ try:
     if health.status_code == 200:
         st.success("✅ Backend Connected")
     else:
-        st.error("❌ Backend Not Responding")
-        st.stop()
+        st.warning("⚠ Backend responded unexpectedly.")
 
 except Exception as e:
-    st.error(f"Cannot connect to backend:\n{e}")
+    st.error(f"❌ Cannot connect to backend:\n{e}")
     st.stop()
 
 uploaded_file = st.file_uploader(
@@ -64,15 +51,8 @@ if uploaded_file:
 
     if st.button("Analyze Image"):
 
-<<<<<<< HEAD
-        st.write("✅ Button Clicked")
-
-        try:
-
-=======
         with st.spinner("Analyzing image..."):
 
->>>>>>> divya
             files = {
                 "file": (
                     uploaded_file.name,
@@ -81,59 +61,41 @@ if uploaded_file:
                 )
             }
 
-<<<<<<< HEAD
-            st.write("📤 Sending image to backend...")
+            try:
 
-            response = requests.post(
-                API_URL,
-                files=files,
-                timeout=60
-            )
+                response = requests.post(
+                    API_URL,
+                    files=files,
+                    timeout=120
+                )
 
-            st.write("Status Code:", response.status_code)
+                if response.status_code == 200:
 
-            result = response.json()
+                    result = response.json()
 
-            st.json(result)
-=======
-            response = requests.post(
-                API_URL,
-                files=files
-            )
+                    st.success("Analysis Completed Successfully")
 
-            if response.status_code == 200:
+                    col1, col2 = st.columns(2)
 
-                result = response.json()
+                    with col1:
+                        st.metric(
+                            "Prediction",
+                            result["prediction"]
+                        )
 
-                st.success("Analysis Completed Successfully")
+                    with col2:
+                        st.metric(
+                            "Confidence",
+                            f"{result['confidence']:.2f}%"
+                        )
 
-                col1, col2 = st.columns(2)
+                    st.subheader("AI Medical Report")
 
-                with col1:
+                    st.markdown(result["report"])
 
-                    st.metric(
-                        "Prediction",
-                        result["prediction"]
-                    )
+                else:
+                    st.error("Backend Error")
+                    st.write(response.text)
 
-                with col2:
-
-                    st.metric(
-                        "Confidence",
-                        f'{result["confidence"]:.2f}%'
-                    )
-
-                st.subheader("AI Medical Report")
-
-                st.markdown(result["report"])
->>>>>>> divya
-
-        except Exception as e:
-
-<<<<<<< HEAD
-            st.exception(e)
-=======
-                st.error("Backend Error")
-
-                st.write(response.text)
->>>>>>> divya
+            except Exception as e:
+                st.exception(e)
