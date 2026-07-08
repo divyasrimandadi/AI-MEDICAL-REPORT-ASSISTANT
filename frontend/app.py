@@ -28,7 +28,7 @@ if uploaded_file:
     st.image(
         image,
         caption="Uploaded Chest X-ray",
-        use_container_width=True
+        width="stretch"     # replaces use_container_width=True
     )
 
     if st.button("Analyze Image"):
@@ -43,12 +43,14 @@ if uploaded_file:
                 )
             }
 
-            response = requests.post(
-                API_URL,
-                files=files
-            )
+            try:
+                response = requests.post(
+                    API_URL,
+                    files=files,
+                    timeout=60
+                )
 
-            if response.status_code == 200:
+                response.raise_for_status()
 
                 result = response.json()
 
@@ -57,25 +59,26 @@ if uploaded_file:
                 col1, col2 = st.columns(2)
 
                 with col1:
-
                     st.metric(
                         "Prediction",
                         result["prediction"]
                     )
 
                 with col2:
-
                     st.metric(
                         "Confidence",
-                        f'{result["confidence"]:.2f}%'
+                        f"{result['confidence']:.2f}%"
                     )
 
                 st.subheader("AI Medical Report")
 
                 st.markdown(result["report"])
 
-            else:
+            except requests.exceptions.ConnectionError:
+                st.error("❌ Cannot connect to backend. Make sure FastAPI is running on port 8000.")
 
-                st.error("Backend Error")
+            except requests.exceptions.Timeout:
+                st.error("❌ Backend timed out.")
 
-                st.write(response.text)
+            except Exception as e:
+                st.error(f"❌ {e}")
