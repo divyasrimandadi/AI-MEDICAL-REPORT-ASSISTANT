@@ -1,61 +1,55 @@
-# Core AI
+# =========================
+# AI / Machine Learning
+# =========================
 tensorflow==2.16.1
 keras==3.3.3
 numpy==1.26.4
 scipy==1.13.1
 h5py==3.11.0
 ml-dtypes==0.3.2
+protobuf==4.25.3
 
+# =========================
 # Image Processing
-opencv-python==4.10.0.84
+# =========================
+opencv-python-headless==4.10.0.84
 Pillow==10.4.0
 matplotlib==3.9.0
 
+# =========================
 # Data Science
+# =========================
 pandas==2.2.2
 scikit-learn==1.4.2
 joblib==1.4.2
 
-# Backend
+# =========================
+# FastAPI Backend
+# =========================
 fastapi==0.115.0
 uvicorn==0.30.6
 python-multipart==0.0.9
-
-# Frontend
-streamlit==1.37.1
-
-# Environment Variables
 python-dotenv==1.0.1
 
-# Google Gemini
-google-generativeai==0.8.5
-google-api-core==2.31.0
-google-auth==2.40.3
-google-auth-httplib2==0.2.0
-google-api-python-client==2.179.0
-googleapis-common-protos==1.70.0
-grpcio==1.71.0
-grpcio-status==1.71.0
-protobuf==5.29.6
-proto-plus==1.26.1
+# =========================
+# Gemini API
+# =========================
+google-generativeai==0.7.2
 
+# =========================
+# Streamlit
+# =========================
+streamlit==1.37.1
+
+# =========================
+# Database
+# =========================
+SQLAlchemy==2.0.36
+
+# =========================
 # Utilities
+# =========================
 requests==2.32.3
 tqdm==4.67.1
 typing_extensions==4.12.2
 packaging==24.2
-python-dateutil==2.9.0.post0
-six==1.17.0
-urllib3==2.3.0
-certifi==2025.1.31
-charset-normalizer==3.4.1
-idna==3.10
-
-# Optional (used by Streamlit)
-altair==5.5.0
-watchdog==6.0.0
-pyarrow==19.0.1
-rich==13.9.4
-
-# SQLite ORM (optional)
-SQLAlchemy==2.0.36
